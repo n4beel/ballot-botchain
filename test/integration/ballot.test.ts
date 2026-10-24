@@ -81,6 +81,8 @@ beforeAll(async () => {
     abi: artifact.abi,
     bytecode: artifact.bytecode.object,
     args: [],
+    chain: local,
+    account: account0,
   });
   const receipt = await publicClient.waitForTransactionReceipt({ hash });
   contractAddress = receipt.contractAddress!;
@@ -114,6 +116,8 @@ describe("Ballot integration on live local anvil", () => {
         ["Yes", "No", "Undecided"],
         86400n, // 1 day
       ],
+      chain: local,
+      account: account0,
     });
     const receipt = await publicClient.waitForTransactionReceipt({ hash: tx });
     expect(receipt.status).toBe("success");
@@ -147,6 +151,8 @@ describe("Ballot integration on live local anvil", () => {
       abi: ballotAbi,
       functionName: "vote",
       args: [1n, 0],
+      chain: local,
+      account: account0,
     });
     const rc0 = await publicClient.waitForTransactionReceipt({ hash: tx0 });
     expect(rc0.status).toBe("success");
@@ -159,6 +165,8 @@ describe("Ballot integration on live local anvil", () => {
       abi: ballotAbi,
       functionName: "vote",
       args: [1n, 0],
+      chain: local,
+      account: account1,
     });
     await publicClient.waitForTransactionReceipt({ hash: tx1 });
 
@@ -168,6 +176,8 @@ describe("Ballot integration on live local anvil", () => {
       abi: ballotAbi,
       functionName: "vote",
       args: [1n, 1],
+      chain: local,
+      account: account2,
     });
     await publicClient.waitForTransactionReceipt({ hash: tx2 });
 
@@ -215,6 +225,8 @@ describe("Ballot integration on live local anvil", () => {
         abi: ballotAbi,
         functionName: "vote",
         args: [1n, 1],
+        chain: local,
+        account: account0,
       });
     } catch (err) {
       thrown = err;
@@ -234,6 +246,8 @@ describe("Ballot integration on live local anvil", () => {
         abi: ballotAbi,
         functionName: "vote",
         args: [1n, 5],
+        chain: local,
+        account: account3,
       });
     } catch (err) {
       thrown = err;
@@ -254,6 +268,8 @@ describe("Ballot integration on live local anvil", () => {
         ["Coffee", "Tea"],
         3600n, // 1 hour
       ],
+      chain: local,
+      account: account1,
     });
     await publicClient.waitForTransactionReceipt({ hash: tx });
 
@@ -319,12 +335,12 @@ describe("Ballot integration on live local anvil", () => {
 
   it("handles poll expiry when time advances", async () => {
     // Advance time by 3601 seconds so poll 2 closes
-    await publicClient.request({
-      method: "evm_increaseTime" as any,
+    await (publicClient.request as any)({
+      method: "evm_increaseTime",
       params: [3601],
     });
-    await publicClient.request({
-      method: "anvil_mine" as any,
+    await (publicClient.request as any)({
+      method: "anvil_mine",
       params: [1],
     });
 
@@ -344,6 +360,8 @@ describe("Ballot integration on live local anvil", () => {
         abi: ballotAbi,
         functionName: "vote",
         args: [2n, 0],
+        chain: local,
+        account: account0,
       });
     } catch (err) {
       thrown = err;

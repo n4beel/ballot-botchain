@@ -5,36 +5,25 @@
 @source "../lib/**/*.{ts,tsx}";
 
 @theme {
-  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
-  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
-
-  --radius: 2px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
+  --font-serif: var(--font-serif), Georgia, serif;
+  --font-sans: var(--font-sans), system-ui, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, monospace;
 }
 
 /**
- * Design tokens.
- *
- * Every component reads these through `var(--token)` rather than a Tailwind colour class, which is
- * what lets a project change its whole palette from `lib/app-config.ts`: the root layout writes
- * `--accent` inline, overriding the default below. Nothing else needs editing per project.
+ * Archetype A · Editorial (newspaper-masthead variant)
+ * Pale blue newsprint base with navy ink and editorial red stamp accent.
  */
 :root {
-  --bg-base: #0A0A0A;
-  --bg-surface: #111111;
-  --bg-elevated: #181818;
-  --bg-overlay: #1F1F1F;
-  --border-subtle: #1E1E1E;
-  --border-default: #2A2A2A;
-  --border-strong: #383838;
-  --text-primary: #EBEBEB;
-  --text-secondary: #888888;
-  --text-tertiary: #555555;
-  --accent: #00E5CC;
-  --success: #1DB954;
-  --warning: #F5A623;
-  --danger: #E53E3E;
+  --bg-base: #E8EEFB;
+  --bg-surface: #F4F7FD;
+  --bg-elevated: #FFFFFF;
+  --text-primary: #14213D;
+  --text-muted: #4A5878;
+  --border-subtle: #B9C5E0;
+  --border-strong: #788BAE;
+  --accent: #B5322E;
+  --accent-ink: #FFFFFF;
 }
 
 @layer base {
@@ -42,6 +31,7 @@
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-shadow: none !important;
   }
 
   html {
@@ -49,33 +39,86 @@
   }
 
   body {
-    background: var(--bg-base);
+    background-color: var(--bg-base);
     color: var(--text-primary);
     font-family: var(--font-sans);
     min-height: 100%;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
   }
 
   a {
     color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+
+  a:hover {
+    color: var(--accent);
+  }
+
+  h1, h2, h3, .font-serif {
+    font-family: var(--font-serif);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-/* Touch targets
- *
- * The interface is deliberately dense, and at 26px tall a `size="sm"` button is comfortable with a
- * mouse and a coin-flip with a thumb. `pointer: coarse` matches touch input rather than screen
- * width, so this raises the hit area exactly where it is needed and leaves mouse density
- * untouched, including on a small laptop window.
- *
- * 44px is Apple's minimum; Android asks for 48dp. Padding rather than height, so a control that is
- * already large enough is not stretched.
- */
+/* Editorial Newspaper Double Rules */
+.rule-double {
+  border-top: 3px double var(--border-subtle);
+}
+
+.rule-double-strong {
+  border-top: 3px double var(--border-strong);
+}
+
+.rule-hairline {
+  border-top: 1px solid var(--border-subtle);
+}
+
+/* Editorial Stamp Effect */
+.editorial-stamp {
+  display: inline-block;
+  transform: rotate(-6deg);
+  border: 3px double var(--accent);
+  color: var(--accent);
+  padding: 3px 8px;
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background-color: rgba(181, 50, 46, 0.04);
+}
+
+/* Optical mark ballot bubble */
+.ballot-bubble {
+  width: 16px;
+  height: 16px;
+  border-radius: 9999px;
+  border: 1.5px solid var(--text-primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.ballot-bubble-filled::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 9999px;
+  background-color: var(--text-primary);
+}
+
+/* Touch target comfort on mobile */
 @media (pointer: coarse) {
   button,
   [role="button"],
-  a.nav-link,
   select,
   label[for] {
     min-height: 44px;
@@ -83,71 +126,11 @@
 
   input,
   textarea {
-    /* Anything under 16px makes iOS Safari zoom the page on focus, and it does not zoom back. */
     font-size: 16px;
   }
 }
 
-/* Nothing should be able to scroll the page sideways. A single overflowing address or hash
- * otherwise shifts the whole layout and there is no obvious culprit. */
-html,
-body {
-  overflow-x: hidden;
-}
-
 ::selection {
-  background: color-mix(in srgb, var(--accent) 18%, transparent);
-  color: var(--accent);
-}
-
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: var(--bg-base);
-}
-::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 2px;
-}
-
-.mono {
-  font-family: var(--font-mono);
-  letter-spacing: 0;
-}
-
-/* Toast entry. Radix drives the data-state; without the keyframes the toast simply appears. */
-@keyframes slideIn {
-  from { transform: translateX(8px); opacity: 0; }
-  to   { transform: translateX(0);   opacity: 1; }
-}
-@keyframes swipeOut {
-  to { transform: translateX(100%); opacity: 0; }
-}
-
-@keyframes shimmer {
-  0%   { background-position: -400px 0; }
-  100% { background-position: 400px 0; }
-}
-.skeleton {
-  background: linear-gradient(
-    90deg,
-    var(--bg-surface) 25%,
-    var(--bg-elevated) 50%,
-    var(--bg-surface) 75%
-  );
-  background-size: 800px 100%;
-  animation: shimmer 1.6s ease-in-out infinite;
-  border-radius: 2px;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  color: var(--text-primary);
 }

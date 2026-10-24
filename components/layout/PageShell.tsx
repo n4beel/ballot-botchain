@@ -2,176 +2,157 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import ConnectButton from "@/components/ui/ConnectButton";
 import NetworkBadge from "@/components/botchain/NetworkBadge";
-import BuiltOnBotChain from "@/components/botchain/BuiltOnBotChain";
 import { app } from "@/lib/app-config";
 
-export type NavItem = { href: string; label: string };
+export interface NavItem {
+  href: string;
+  label: string;
+}
 
 interface PageShellProps {
   children: React.ReactNode;
-  nav?: NavItem[];
   title?: string;
   description?: string;
+  nav?: NavItem[];
 }
 
-/**
- * App frame.
- *
- * A top bar rather than ghost-pay's 220px rail. These apps have two or three screens, and a rail
- * that wide spends a fifth of a laptop window — and all of a phone — on three links. The bar is
- * the same at every width, which also means there is no drawer, no focus trap and no hamburger to
- * get wrong.
- *
- * Height is `100dvh` rather than `100vh`. On mobile Safari and Chrome, `100vh` is the viewport
- * with the browser chrome *retracted*, so a `h-screen` layout with `overflow-hidden` pushes its
- * own footer under the address bar and the user cannot scroll to it.
- */
-export default function PageShell({ children, nav = [], title, description }: PageShellProps) {
-  return (
-    <div
-      className="flex flex-col overflow-x-hidden"
-      style={{ minHeight: "100dvh", background: "var(--bg-base)" }}
-    >
-      <header
-        className="sticky top-0 z-30 flex-shrink-0"
-        style={{
-          borderBottom: "1px solid var(--border-subtle)",
-          background: "var(--bg-surface)",
-        }}
-      >
-        <div className="mx-auto w-full max-w-[880px] px-4 md:px-6">
-          <div className="flex items-center gap-3 py-2.5">
-            <Link href="/" className="flex items-center gap-2 flex-shrink-0 no-underline">
-              <span
-                className="w-2 h-2 flex-shrink-0"
-                style={{ background: "var(--accent)" }}
-                aria-hidden="true"
-              />
-              <span
-                className="text-[14px] font-semibold tracking-[-0.01em]"
-                style={{ color: "var(--text-primary)" }}
-              >
-                {app.name}
-              </span>
-            </Link>
+function getEditorialDate(): string {
+  const now = new Date();
+  const dayName = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(now);
+  const day = now.getDate();
+  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(now);
+  return `${dayName} ${day} ${month}`;
+}
 
-            <div className="flex-1" />
+export default function PageShell({ children, title, description }: PageShellProps) {
+  const pathname = usePathname();
+  const [dateLine, setDateLine] = useState("Polling is open");
+
+  useEffect(() => {
+    setDateLine(`${getEditorialDate()} · polling is open`);
+  }, []);
+
+  return (
+    <div className="min-h-[100dvh] flex flex-col bg-[var(--bg-base)] text-[var(--text-primary)]">
+      {/* Newspaper Masthead */}
+      <header className="pt-6 pb-4 px-4 max-w-[600px] w-full mx-auto">
+        {/* Top double rule */}
+        <div className="rule-double-strong mb-2" />
+
+        {/* Masthead Title */}
+        <div className="text-center py-2">
+          <Link
+            href="/"
+            className="no-underline hover:text-[var(--text-primary)] text-inherit"
+          >
+            <h1 className="font-serif text-[42px] md:text-[54px] tracking-[0.08em] uppercase font-bold leading-none select-none">
+              {app.name}
+            </h1>
+          </Link>
+        </div>
+
+        {/* Bottom double rule */}
+        <div className="rule-double mb-2" />
+
+        {/* Dateline & Connect row */}
+        <div className="flex flex-wrap items-center justify-between gap-2 py-1 text-[12px] text-[var(--text-muted)]">
+          <div className="font-serif italic tracking-wide">
+            {dateLine}
+          </div>
+          <div className="flex items-center gap-2">
             <NetworkBadge />
-            <div className="w-[150px] md:w-[180px] flex-shrink-0">
+            <div className="w-[130px]">
               <ConnectButton />
             </div>
           </div>
-
-          {nav.length > 0 && <Nav items={nav} />}
         </div>
+
+        {/* Hairline beneath dateline */}
+        <div className="rule-hairline mt-1.5 mb-3" />
+
+        {/* Minimal text-link navigation (separated by dot, no chrome) */}
+        <nav className="flex items-center justify-center gap-2 text-[13px] font-sans tracking-wide">
+          <Link
+            href="/"
+            className={`no-underline hover:underline ${
+              pathname === "/" ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+            }`}
+          >
+            Open polls
+          </Link>
+          <span className="text-[var(--border-strong)]" aria-hidden="true">
+            ·
+          </span>
+          <Link
+            href="/new"
+            className={`no-underline hover:underline ${
+              pathname === "/new" ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+            }`}
+          >
+            Ask a question
+          </Link>
+          <span className="text-[var(--border-strong)]" aria-hidden="true">
+            ·
+          </span>
+          <Link
+            href="/mine"
+            className={`no-underline hover:underline ${
+              pathname === "/mine" ? "font-semibold text-[var(--text-primary)]" : "text-[var(--text-muted)]"
+            }`}
+          >
+            My questions
+          </Link>
+        </nav>
       </header>
 
-      <main className="flex-1 mx-auto w-full max-w-[880px] px-4 py-6 md:px-6 md:py-8">
+      {/* Main Column */}
+      <main className="flex-1 w-full max-w-[600px] mx-auto px-4 py-4">
         {(title || description) && (
-          <div className="mb-6">
+          <header className="mb-6">
             {title && (
-              <h1
-                className="text-[20px] md:text-[24px] font-semibold tracking-[-0.015em]"
-                style={{ color: "var(--text-primary)" }}
-              >
+              <h2 className="font-serif text-[28px] md:text-[34px] font-bold leading-tight tracking-tight text-[var(--text-primary)]">
                 {title}
-              </h1>
+              </h2>
             )}
             {description && (
-              <p
-                className="mt-1.5 text-[13px] leading-relaxed"
-                style={{ color: "var(--text-secondary)" }}
-              >
+              <p className="mt-1 text-[14px] leading-relaxed text-[var(--text-muted)] italic font-serif">
                 {description}
               </p>
             )}
-          </div>
+            <div className="rule-hairline mt-4" />
+          </header>
         )}
         {children}
       </main>
 
-      {/*
-        The ecosystem footer is required, not decorative. BOT Chain's project assessment criteria
-        ask that the footer or an ecosystem-partnership section carry the BOT Chain name and link
-        to both botchain.ai and the explorer; a site without it is not counted, however complete
-        the product is. It lives in the shared shell so no project can ship missing it.
-      */}
-      <footer
-        className="flex-shrink-0 mx-auto w-full max-w-[880px] px-4 py-6 md:px-6"
-        style={{ borderTop: "1px solid var(--border-subtle)" }}
-      >
-        <div className="flex flex-col gap-3">
-          <p className="text-[11px]" style={{ color: "var(--text-tertiary)" }}>
-            {app.tagline}
-          </p>
-
-          <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-            <span className="inline-flex items-center gap-2">
-              <span
-                aria-hidden="true"
-                className="inline-block w-2 h-2 flex-shrink-0"
-                style={{ background: "var(--accent)", borderRadius: "1px" }}
-              />
-              <BuiltOnBotChain
-                className="text-[11px] uppercase tracking-[0.06em]"
-                style={{ color: "var(--text-secondary)" }}
-              />
-            </span>
-
-            <a
-              href="https://botchain.ai"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[11px] underline"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              botchain.ai
-            </a>
-
-            <a
-              href="https://scan.botchain.ai"
-              target="_blank"
-              rel="noreferrer"
-              className="text-[11px] underline"
-              style={{ color: "var(--text-tertiary)" }}
-            >
-              BOT Chain Explorer
-            </a>
-          </div>
-        </div>
+      {/* Colophon Footer */}
+      <footer className="w-full max-w-[600px] mx-auto px-4 py-8 mt-12 text-center text-[11px] uppercase tracking-widest text-[var(--text-muted)]">
+        <div className="rule-hairline mb-4" />
+        <p className="font-serif">
+          {app.name} · One wallet, one vote · Equal-weight polling on{" "}
+          <a
+            href="https://botchain.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-[var(--accent)]"
+          >
+            BOT Chain
+          </a>{" "}
+          (
+          <a
+            href="https://explorer.botchain.ai"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline hover:text-[var(--accent)]"
+          >
+            Explorer
+          </a>
+          )
+        </p>
       </footer>
     </div>
-  );
-}
-
-/**
- * Horizontal tabs. `aria-current` rather than colour alone marks the active one, and the active
- * check is an exact match so `/` does not light up on every page.
- */
-function Nav({ items }: { items: NavItem[] }) {
-  const pathname = usePathname();
-
-  return (
-    <nav className="flex items-center gap-1 -mb-px overflow-x-auto">
-      {items.map((item) => {
-        const active = pathname === item.href;
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            aria-current={active ? "page" : undefined}
-            className="nav-link flex items-center px-3 py-2 text-[12px] uppercase tracking-[0.04em] no-underline whitespace-nowrap"
-            style={{
-              color: active ? "var(--accent)" : "var(--text-secondary)",
-              borderBottom: `1px solid ${active ? "var(--accent)" : "transparent"}`,
-            }}
-          >
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
