@@ -59,6 +59,7 @@ export default function PollVoteView({ id }: { id: bigint }) {
     args: [id],
     query: {
       enabled: Boolean(deployment?.address && id > 0n),
+      retry: false,
     },
   });
 

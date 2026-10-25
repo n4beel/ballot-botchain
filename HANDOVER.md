@@ -65,3 +65,52 @@ python3 scripts/check-distinct.py ballot
 - **Identity:** Voting tracks addresses, not individuals. A voter with multiple addresses can vote multiple times.
 - **Immutability:** Once cast, a vote cannot be retracted or altered. Poll creators cannot edit, delete, or close questions early.
 - **Transparency:** Standings are public while polling is open; there are no secret ballots.
+
+## Feedback round 1
+
+All findings from `docs/specs/FEEDBACK-ballot.md` addressed and verified:
+
+1. **Local stack points app at seeded chain (`scripts/local-stack.mjs`):** FIXED.
+   - Added `NEXT_PUBLIC_BOTCHAIN_NETWORK=testnet` and `NEXT_PUBLIC_BOHR_RPC=http://127.0.0.1:8703` into `.env.local` written by `scripts/local-stack.mjs`.
+   - Verified that after running `node scripts/local-stack.mjs && npm run dev`, seeded records immediately load in the browser without any manual env edits.
+
+2. **Seeded chain time aligned to wall-clock time (`scripts/local-stack.mjs`):** FIXED.
+   - Computed total warp across seeding phases (`3601 + 3360 = 6961s`).
+   - Started anvil with `--timestamp <now - 6961>`. Only warped forward across phases:
+     - Phase 1: Polls 1 & 2 created, warped 3601s (both closed in the past).
+     - Phase 2: Poll 3 created (duration 3600s), warped 3360s (closes in exactly 240s = 4 minutes).
+     - Phase 3: Polls 4, 5, 6 created at current real time.
+   - Asserted `diff <= 120s` between latest block timestamp and host wall-clock time (`diff = 0s`), and printed the alignment confirmation.
+
+3. **Real browser walkthrough (`docs/specs/tools/mock-wallet.js`):** FIXED.
+   - Walkthrough conducted on running local stack (`http://127.0.0.1:8703`) and dev server (`http://localhost:3003`) with Google Chrome headless and `mock-wallet.js`.
+   - Added `query: { retry: false }` for `pollOf` in `components/ballot/PollVoteView.tsx` so non-existent poll lookups (`/p/999`) immediately transition to 404 state without query retry stalls.
+   - Verified responsive layouts across 360 px, 720 px, and 1280 px viewports.
+   - Tested route `/` as Observer (loaded all 6 seeded polls, verified section headings, open/closed badges, countdowns).
+   - Tested route `/p/4` as Observer without wallet (browsed poll with 14 votes across 4 options, saw Connect a wallet to vote note).
+   - Tested route `/p/4` as Acc 0 (voter, cast vote on option 1 on-chain, verified `VOTE RECORDED` stamp with explorer link).
+   - Tested route `/p/6` as Acc 0 (prior voter, verified persistent `VOTE RECORDED` stamp).
+   - Tested route `/p/1` as Observer (closed poll with tie, verified tie banner and equal vote tallies).
+   - Tested route `/p/2` as Observer (closed poll with winner, verified winner badge and percentage bar).
+   - Tested route `/p/3` as Observer (boundary poll closing in ~4m, verified active countdown).
+   - Tested route `/p/999` as Observer (non-existent poll, verified clean 404 "Ballot not found" state).
+   - Tested route `/new` as Acc 0 (published new 2-option poll on-chain, verified redirect to new poll page).
+   - Tested route `/mine` as Acc 0 (creator portfolio, verified listing of authored polls with status and live totals).
+   - Confirmed 0 console errors and 0 hydration warnings across all 10 route/role tests.
+
+### Browser Walkthrough Results
+
+| Route | Role | Action | Status | Console Errors | Hydration Warnings | Notes |
+|---|---|---|---|---|---|---|
+| `/` (360px, 720px, 1280px) | Visitor | Viewport responsiveness checks | PASS | 0 | 0 | Layout and masthead scale cleanly without horizontal overflow |
+| `/` | Observer (No Wallet) | View open & closed poll listings with live tallies | PASS | 0 | 0 | Displays all 6 seeded polls under Open and Closed sections |
+| `/p/4` | Observer (No Wallet) | Read-only inspection of open poll with 14 votes | PASS | 0 | 0 | Shows 4 options, live percentages, and "CONNECT A WALLET TO VOTE" note |
+| `/p/4` | Acc 0 (Voter) | Select option 1 and cast vote on-chain | PASS | 0 | 0 | Vote submitted and confirmed on-chain; displays rotated "VOTE RECORDED" stamp |
+| `/p/6` | Acc 0 (Prior Voter) | View poll already voted on during seed | PASS | 0 | 0 | Immediately renders "VOTE RECORDED" stamp and selected option badge |
+| `/p/1` | Observer (No Wallet) | View closed poll ending in a tie | PASS | 0 | 0 | Renders "Closed · Result: Tie" banner with balanced vote totals |
+| `/p/2` | Observer (No Wallet) | View closed poll with clear winner | PASS | 0 | 0 | Renders "Closed · Winner:" banner with highlighted winning option |
+| `/p/3` | Observer (No Wallet) | Inspect poll seeded to close in ~4 minutes | PASS | 0 | 0 | Displays dynamic countdown "~3m remaining" / "~4m remaining" |
+| `/p/999` | Observer (No Wallet) | Inspect non-existent poll ID | PASS | 0 | 0 | Displays clean 404 "Ballot not found" error state with link back to index |
+| `/new` | Acc 0 (Creator) | Publish a new 2-option poll on-chain | PASS | 0 | 0 | Created poll on-chain and redirected to newly generated `/p/7` ballot page |
+| `/mine` | Acc 0 (Creator) | View creator portfolio of authored polls | PASS | 0 | 0 | Displays authored polls with status, live vote counts, and direct links |
+
