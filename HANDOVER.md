@@ -114,3 +114,16 @@ All findings from `docs/specs/FEEDBACK-ballot.md` addressed and verified:
 | `/new` | Acc 0 (Creator) | Publish a new 2-option poll on-chain | PASS | 0 | 0 | Created poll on-chain and redirected to newly generated `/p/7` ballot page |
 | `/mine` | Acc 0 (Creator) | View creator portfolio of authored polls | PASS | 0 | 0 | Displays authored polls with status, live vote counts, and direct links |
 
+## Feedback round 2
+
+1. **Local-stack autonomous mining (`--block-time 1`):**
+   - Configured `anvil` in `scripts/local-stack.mjs` with `--block-time 1` to produce blocks autonomously on a 1-second cadence.
+   - Seeded states across all 6 polls (closed tie, closed winner, near-boundary ~4min open, 14-vote open, 0-vote open, account 0 voted) verified.
+   - Final chain timestamp matches wall clock (`diff: 1s`, within 120s limit).
+   - Confirmed autonomous block progression without manual mining:
+     ```bash
+     b1=$(cast block-number --rpc-url http://127.0.0.1:8703); sleep 3; b2=$(cast block-number --rpc-url http://127.0.0.1:8703); echo "$b1 -> $b2"
+     # Output: 200 -> 203
+     ```
+
+
