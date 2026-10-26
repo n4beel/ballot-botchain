@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import ConnectButton from "@/components/ui/ConnectButton";
 import NetworkBadge from "@/components/botchain/NetworkBadge";
+import BuiltOnBotChain from "@/components/botchain/BuiltOnBotChain";
+import { footerLinks } from "@/lib/botchain/chain";
 import { app } from "@/lib/app-config";
 
 export interface NavItem {
@@ -30,6 +32,7 @@ function getEditorialDate(): string {
 export default function PageShell({ children, title, description }: PageShellProps) {
   const pathname = usePathname();
   const [dateLine, setDateLine] = useState("Polling is open");
+  const { site, explorer } = footerLinks();
 
   useEffect(() => {
     setDateLine(`${getEditorialDate()} · polling is open`);
@@ -131,26 +134,28 @@ export default function PageShell({ children, title, description }: PageShellPro
       {/* Colophon Footer */}
       <footer className="w-full max-w-[600px] mx-auto px-4 py-8 mt-12 text-center text-[11px] uppercase tracking-widest text-[var(--text-muted)]">
         <div className="rule-hairline mb-4" />
-        <p className="font-serif">
-          {app.name} · One wallet, one vote · Equal-weight polling on{" "}
+        <p className="font-serif flex flex-wrap items-center justify-center gap-2">
+          <span>{app.name} · One wallet, one vote · Equal-weight polling</span>
+          <span aria-hidden="true">·</span>
+          <BuiltOnBotChain className="underline hover:text-[var(--accent)]" />
+          <span aria-hidden="true">·</span>
           <a
-            href="https://botchain.ai"
+            href={site}
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-[var(--accent)]"
           >
-            BOT Chain
-          </a>{" "}
-          (
+            botchain.ai
+          </a>
+          <span aria-hidden="true">·</span>
           <a
-            href="https://explorer.botchain.ai"
+            href={explorer}
             target="_blank"
             rel="noopener noreferrer"
             className="underline hover:text-[var(--accent)]"
           >
             Explorer
           </a>
-          )
         </p>
       </footer>
     </div>
