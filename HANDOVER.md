@@ -143,3 +143,18 @@ All findings from `docs/specs/FEEDBACK-ballot.md` addressed and verified:
   - `/` (Home): Verified all three links present (`https://scan.bohr.life/address/0x5fbdb2315678afecb367f032d93f642f64180aa3`, `https://botchain.ai`, `https://scan.botchain.ai`).
   - `/p/1` (Detail): Verified all three links present.
   - `/nonexistent` (Not Found): Verified all three links present.
+
+## Feedback round 4
+
+- **Item 1 (Shared CSS Tokens & Contrast):**
+  - Defined missing tokens in `app/globals.css`:
+    - `--border-default: #B9C5E0`
+    - `--text-secondary: #354664` (9.8:1 contrast on `--bg-elevated: #FFFFFF`, WCAG AAA)
+    - `--text-tertiary: #526384` (5.8:1 contrast on `--bg-elevated`, WCAG AA)
+    - `--success: #1B6836` (6.5:1 contrast on `--bg-elevated`, WCAG AA)
+    - `--danger: #B5322E` (5.4:1 contrast on `--bg-elevated`, WCAG AA)
+    - `--warning: #8F4C00` (6.3:1 contrast on `--bg-elevated`, WCAG AA)
+  - Updated `ConnectButton.tsx` menu items with readable typography, defined surfaces, and hover state (`hover:bg-[rgba(20,33,61,0.06)]`).
+  - Added unit test `test/lint/tokens.test.ts`.
+  - Verified `python3 scripts/check-tokens.py ballot` exits 0 with zero undefined tokens.
+

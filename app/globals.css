@@ -19,11 +19,17 @@
   --bg-surface: #F4F7FD;
   --bg-elevated: #FFFFFF;
   --text-primary: #14213D;
+  --text-secondary: #354664;
+  --text-tertiary: #526384;
   --text-muted: #4A5878;
   --border-subtle: #B9C5E0;
+  --border-default: #B9C5E0;
   --border-strong: #788BAE;
   --accent: #B5322E;
   --accent-ink: #FFFFFF;
+  --success: #1B6836;
+  --danger: #B5322E;
+  --warning: #8F4C00;
 }
 
 @layer base {
